@@ -1,0 +1,12 @@
+.DS_Store
+rsim
+rasm
+*.output
+*.tab.?pp
+*.yy.c
+*.swo
+*.swp
+*.tmproj
+*.o
+*.u
+*.d

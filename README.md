@@ -35,7 +35,7 @@ The simulator `rsim` responds to the following command switches:
 ## Implementation Notes
 
 The [instruction pipeline][3] implementation is mostly contained in `stages.{c,h}`. I’ve tried to follow
-the basic design of the COD MIPS pipeline. This means control signals and [latches][1] are simulated.
+the basic design of the COD MIPS pipeline. This means [control signals][9] and [latches][1] are simulated.
 
 As a result, much of the semantics used to describe the five-stage MIPS CPU in COD is
 transferable directly to the simulator, accelerating development. Unfortunately, all
@@ -155,6 +155,7 @@ understanding of CPU design.
 [6]: http://en.wikipedia.org/wiki/Assembly_language
 [7]: http://en.wikipedia.org/wiki/Flex_lexical_analyser
 [8]: http://en.wikipedia.org/wiki/GNU_bison
+[9]: http://www.d.umn.edu/~gshute/spimsal/new/control-signal-summary.xhtml
 
 
 

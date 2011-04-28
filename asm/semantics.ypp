@@ -1,0 +1,170 @@
+%{
+#include "sim/types.h"
+#include "asm/codegen.h"
+#include <iostream>
+using namespace std;
+void yyerror(char*);
+extern int yylineno;
+int yylex();
+extern codegen * cgen;
+short inline PACK_OPERANDS(byte x, byte y, byte z) {
+  return  x      & (unsigned short)0x001F | 
+         (y<<5)  & (unsigned short)0x03e0 | 
+         (z<<10) & (unsigned short)0x7C00;
+  }
+%}
+%token NEWLINE TEXT_SECTION DATA_SECTION LABELDECL INTEGER LABELREF REGISTER INVALID_REGISTER
+%token ADDI ADD SUBI BRANCH BRANCHEQZ BRANCHGE BRANCHNE LOADADDR LOADBYTE LOADIMMED SYSCALL NOOP
+%token WORD BYTE SPACE ASCII ASCIIZ STRING SECTION_IDENT
+%type<sysword>   INTEGER REGISTER
+%type<sysstring> STRING LABELDECL LABELREF
+%%
+
+program      : statements 
+             ;
+
+statements   : statement
+             | statements NEWLINE statement
+             ;
+
+addressable  : dataelement
+             | instruction { cgen->emit<byte>(0); /* just rounding off to 8 bytes per instruction */ }
+             ;
+             
+dataelement  : word
+             | byte
+             | space
+             | ascii
+             | asciiz
+             | error {
+               cout << "invalid data element; line " << yylineno << endl; exit(11);
+             }
+             ;
+
+labeldec     : /*empty*/
+             | LABELDECL       { cgen->label_here($1.ptr); }
+             ;
+
+offset       : INTEGER '(' REGISTER ')'  { sys_offset s = {$3, $1};  $<sysoffset>$ = s; }
+             | '(' REGISTER ')'   { sys_offset s = {$2, 0};  $<sysoffset>$ = s; }
+             | error {
+                cout << "invalid offset; line " << yylineno << endl;  exit(11);
+             }
+             ;
+           
+rsrc1        : REGISTER
+             | error { cout << "expected first source register; line " << yylineno << endl; exit(11);}
+             ;
+
+rsrc2        : REGISTER
+             | error { cout << "expected second source register; line " << yylineno << endl; exit(11);}
+             ;
+           
+rdest        : REGISTER 
+             | error { cout << "expected destination register; line " << yylineno << endl; exit(11);}
+             ;
+
+address      : INTEGER         { cgen->emit<system_word>($1); }
+             | LABELREF        { cgen->emit_label_address($1.ptr); }
+             | error {
+                cout << "invalid address; line " << yylineno << endl;  exit(11);
+             }
+             ;
+
+statement    : TEXT_SECTION    { cgen->in_text_section(); }
+             | DATA_SECTION    { cgen->in_data_section(); }
+             | labeldec
+             | labeldec addressable
+             | SECTION_IDENT {
+               cout << "invalid section; line " << yylineno << endl; exit(10);
+             }
+             ;
+             
+instruction : ADDI    { cgen->emit<byte>(1); } rdest ',' rsrc1 { 
+                  cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
+                  INTEGER { cgen->emit<system_word>($8); }
+             | ADD    { cgen->emit<byte>(9); } rdest ',' rsrc1 ',' rsrc2 {
+                cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, $7.sysword)); 
+                cgen->emit<system_word>(0); }
+             | SUBI   { cgen->emit<byte>(8); }    
+               rdest ',' rsrc1 { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
+               INTEGER {
+                 cgen->emit<system_word>($8);
+               }
+             | BRANCHGE  { cgen->emit<byte>(3); }  
+               rsrc1 ',' rsrc2 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); } 
+               address
+             | BRANCHNE  { cgen->emit<byte>(4); } 
+               rsrc1 ',' rsrc2 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); }
+               address
+             | LOADBYTE  { cgen->emit<byte>(6); }
+               rdest ',' offset    { 
+                 cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysoffset.reg, 0)); 
+                 cgen->emit<system_word>($5.sysoffset.offset);
+               }
+             | LOADADDR  { cgen->emit<byte>(5); } 
+               rdest ',' { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, 0, 0)); } 
+               address
+             | BRANCHEQZ { cgen->emit<byte>(2); } 
+               rsrc1 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, 0)); }
+               address
+             | LOADIMMED rdest ',' INTEGER {
+                 cgen->emit<byte>(7);
+                 cgen->emit<short>(PACK_OPERANDS($2.sysword, 0, 0));
+                 cgen->emit<system_word>($4);
+               }
+             | BRANCH { cgen->emit<byte>(2); cgen->emit<short>(0); }    
+               address
+             | SYSCALL {
+                  cgen->emit<byte>(10); cgen->emit<short>(0); cgen->emit<system_word>(0);
+               }
+             | NOOP {
+                 cgen->emit<byte>(0); cgen->emit<short>(0); cgen->emit<system_word>(0);
+               }
+             | LABELREF {
+                cout << "unknown instruction; line " << yylineno << endl;  exit(11);  
+              }
+             
+             ;
+
+word         : WORD integers
+             | WORD error {
+                 cout << "invalid .word; line " << yylineno << endl;  exit(11);             
+             }                                     
+             ;                                     
+
+byte         : BYTE bytes             
+             | BYTE error {                        
+                cout << "invalid .byte; line " << yylineno << endl;   exit(11);            
+             }                                     
+             ;                                     
+
+space        : SPACE INTEGER         { cgen->emit_n_bytes($2); }
+             | SPACE error {                       
+               cout << "invalid .space; line " << yylineno << endl;   exit(11);             
+             }                                     
+             ;                                     
+
+ascii        : ASCII STRING          { cgen->emit_string($2.ptr, $2.len); }
+             | ASCII error {                       
+                cout << "invalid .ascii; line " << yylineno << endl;  exit(11);
+             }
+             ;
+
+asciiz       : ASCIIZ STRING          { cgen->emit_string($2.ptr, $2.len); cgen->emit<byte>(0); }
+             | ASCIIZ error {                       
+                cout << "invalid .asciiz; line " << yylineno << endl;  exit(11);
+             }
+             ;
+
+integers     : INTEGER               { cgen->emit<system_word>($1); }
+             | integers INTEGER      { cgen->emit<system_word>($2); }
+             ;
+
+bytes        : INTEGER               { cgen->emit<byte>($1); }
+             | bytes INTEGER         { cgen->emit<byte>($2); }
+             ;
+             
+%%
+
+

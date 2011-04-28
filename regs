@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ -z "$1" ]
+then
+  echo "Usage: $0 [source-assembly-file] <m|c|v>"
+  echo "       see the component program's help for detailed usage instructions. "
+  exit $E_NOARGS
+fi
+
+echo "script: assembling..."
+./rasm -f "$1" -t temp.t -d temp.d
+if [ "$?" = "0" ]
+then
+  shift
+  echo "script: simulating..."
+  ./rsim -t temp.t -d temp.d $*
+  rm -f temp.t temp.d
+  echo "script: done"
+fi
