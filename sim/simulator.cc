@@ -12,14 +12,16 @@ extern int32_t optopt;
 extern int32_t opterr;
 extern int32_t optreset;
 
+using namespace std;
+
 // Usage of the program
 static void usage(char *name)
 {
-	std::cout << name << " usage:\n" <<
-	"\t-t text_stream_file: load .text with the contents of file\n" <<
-	"\t-d data_stream_file: [optional] load .data with contents of file\n" <<
-	"\t-v: very verbose single-click CPU (echo every stage, pause after each cycle)\n" <<
-	"\t-m: collect and display memory statistics\n\t\t(position relative to -t and -d is important)\n";
+	cout << name << " usage:\n" <<
+	        "\t-t text_stream_file: load .text with the contents of file\n" <<
+	        "\t-d data_stream_file: [optional] load .data with contents of file\n" <<
+	        "\t-v: very verbose single-click CPU (echo every stage, pause after each cycle)\n" <<
+	        "\t-m: collect and display memory statistics\n\t\t(position relative to -t and -d is important)\n";
 }
 
 
@@ -39,9 +41,9 @@ int32_t main(int32_t argc, char **argv)
 	while ((ch = getopt(argc, argv, "t:d:vmc")) != -1) {
 		switch (ch) {
 		case 't': {
-			std::ifstream input(optarg, std::ios::binary);
+			ifstream input(optarg, ios::binary);
 			if (!(input.good() && input.is_open())) {
-				std::cout << *argv << ": " << optarg << " does not exist" << std::endl;
+				cout << *argv << ": " << optarg << " does not exist" << endl;
 				exit(20);
 			}
 			byte  c;
@@ -64,9 +66,9 @@ int32_t main(int32_t argc, char **argv)
 			break;
 
 		case 'd': {
-			std::ifstream input(optarg, std::ios::binary);
+			ifstream input(optarg, ios::binary);
 			if (!(input.good() && input.is_open())) {
-				std::cout << *argv << ": " << optarg << " does not exist" << std::endl;
+				cout << *argv << ": " << optarg << " does not exist" << endl;
 				exit(20);
 			}
 			byte c;
@@ -93,9 +95,9 @@ int32_t main(int32_t argc, char **argv)
 		usage(*argv);
 		exit(10);
 	}
-	std::cout << *argv << ": Starting CPU..." << std::endl;
+	cout << *argv << ": Starting CPU..." << endl;
 	run_cpu(&mem, verb);
-	std::cout << *argv << ": CPU Finished" << std::endl;
+	cout << *argv << ": CPU Finished" << endl;
 
 	if (mem.is_collecting()) mem.display_memory_stats();
 }

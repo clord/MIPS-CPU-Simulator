@@ -4,6 +4,9 @@
 #include <iostream>
 //#define MAP_ANON MAP_ANONYMOUS
 
+using namespace std;
+
+
 memory::memory()
 {
 	mem = (byte *)mmap(NULL, 0x100000000, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
@@ -31,13 +34,13 @@ memory::~memory()
 
 void memory::display_stack()
 {
-	std::cout << "-----stack-----" << std::endl;
-	std::cout.setf(std::ios::hex, std::ios::basefield);
+	cout << "-----stack-----" << endl;
+	cout.setf(ios::hex, ios::basefield);
 	for (int32_t x = stack_segment; x > sp; x -= sizeof(uint32_t)) {
-		std::cout << "0x" << x << ": 0x" <<
-		*(int32_t *)crackaddr(x) << std::endl;
+		cout << "0x" << x << ": 0x" <<
+		*(int32_t *)crackaddr(x) << endl;
 	}
-	std::cout << "---------------" << std::endl;
+	cout << "---------------" << endl;
 }
 
 
@@ -56,18 +59,18 @@ void memory::collect_stats(bool state)
 void memory::display_memory_stats()
 {
 	if (collectstats)
-		std::cout << std::endl <<
-		"-=-=-=-=Memory Access Statistics-=-=-=-=" << std::endl <<
-		"    read bytes: " << bytesout << std::endl <<
-		"         reads: " << readhits << " (plus " << stackpops << " pops)" << std::endl <<
-		"    bytes/read: " << bytesout / (double)(readhits + stackpops) << std::endl <<
-		"----------------------------------------" << std::endl <<
-		"   write bytes: " << bytesin << std::endl <<
-		"        writes: " << writehits << " (plus " << stackpushes << " pushes)" << std::endl <<
-		"   bytes/write: " << bytesin / (double)(writehits + stackpushes) << std::endl <<
-		"-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << std::endl;
+		cout << endl <<
+		     "-=-=-=-=Memory Access Statistics-=-=-=-=" << endl <<
+		     "    read bytes: " << bytesout << endl <<
+		     "         reads: " << readhits << " (plus " << stackpops << " pops)" << endl <<
+		     "    bytes/read: " << bytesout / (double)(readhits + stackpops) << endl <<
+		     "----------------------------------------" << endl <<
+		     "   write bytes: " << bytesin << endl <<
+		     "        writes: " << writehits << " (plus " << stackpushes << " pushes)" << endl <<
+		     "   bytes/write: " << bytesin / (double)(writehits + stackpushes) << endl <<
+		     "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
 	else
-		std::cout << "no statistics collected" << std::endl;
+		cout << "no statistics collected" << endl;
 }
 
 
