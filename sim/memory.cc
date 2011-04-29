@@ -63,11 +63,11 @@ void memory::display_memory_stats()
 		     "-=-=-=-=Memory Access Statistics-=-=-=-=" << endl <<
 		     "    read bytes: " << bytesout << endl <<
 		     "         reads: " << readhits << " (plus " << stackpops << " pops)" << endl <<
-		     "    bytes/read: " << bytesout / (double)(readhits + stackpops) << endl <<
+		     "    bytes/read: " << bytesout / double(readhits + stackpops) << endl <<
 		     "----------------------------------------" << endl <<
 		     "   write bytes: " << bytesin << endl <<
 		     "        writes: " << writehits << " (plus " << stackpushes << " pushes)" << endl <<
-		     "   bytes/write: " << bytesin / (double)(writehits + stackpushes) << endl <<
+		     "   bytes/write: " << bytesin / double(writehits + stackpushes) << endl <<
 		     "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
 	else
 		cout << "no statistics collected" << endl;
