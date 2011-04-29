@@ -4,6 +4,8 @@
 #include "../sim/types.h"
 #include "../sim/memory.h"
 
+using namespace std;
+
 int32_t yyparse();
 extern FILE *yyin;
 codegen *cgen;
@@ -11,7 +13,7 @@ codegen *cgen;
 // this is the generic error handler. we skip it in final builds
 void yyerror(const char *s)
 {
-	std::cout << s << ": ";
+	cout << s << ": ";
 }
 
 
@@ -40,10 +42,10 @@ static void replaceExtension(char *name, const char *newext)
 // Prints a nice useful usage message
 static void usage(char *name)
 {
-	std::cout << name << " usage:\n" <<
-	"\t-f source_file: read ascii assembly code from file\n" <<
-	"\t-t text_stream_file: [optional] output .text to specified file\n" <<
-	"\t-d data_stream_file: [optional] output .data to specified file\n";
+	cout << name << " usage:\n" <<
+	     "\t-f source_file: read ascii assembly code from file\n" <<
+	     "\t-t text_stream_file: [optional] output .text to specified file\n" <<
+	     "\t-d data_stream_file: [optional] output .data to specified file\n";
 }
 
 
@@ -55,8 +57,8 @@ int32_t main(int32_t argc, char **argv)
 	int32_t ch;
 	char *source = NULL;
 	char *textdest = NULL, *datadest = NULL;
-	std::ofstream text_stream;
-	std::ofstream data_stream;
+	ofstream text_stream;
+	ofstream data_stream;
 
 	while ((ch = getopt(argc, argv, "t:d:f:")) != -1) {
 		switch (ch) {
@@ -94,8 +96,8 @@ int32_t main(int32_t argc, char **argv)
 		datadest = strdup(source);
 		replaceExtension(datadest, "d");
 	}
-	data_stream.open(datadest, std::ios::binary);
-	text_stream.open(textdest, std::ios::binary);
+	data_stream.open(datadest, ios::binary);
+	text_stream.open(textdest, ios::binary);
 
 	bool success = false;
 	cgen = new codegen(writeback_position_t(text_segment, &text_stream)
@@ -114,7 +116,7 @@ int32_t main(int32_t argc, char **argv)
 
 	if (!cgen->balanced_labels()) {
 		delete cgen;
-		std::cerr << *argv << ": a label was used, but not defined" << std::endl;
+		cerr << *argv << ": a label was used, but not defined" << endl;
 		success = false;
 	}
 
@@ -124,15 +126,15 @@ int32_t main(int32_t argc, char **argv)
 	data_stream.close();
 
 	if (success) {
-		std::cout << *argv <<
-		             ": finished assembling \"" << source << "\"" << std::endl <<
-		             "files created: * \"" << textdest << "\"" << std::endl <<
-		             "               * \"" << datadest << "\"" << std::endl;
+		cout << *argv <<
+		        ": finished assembling \"" << source << "\"" << endl <<
+		        "files created: * \"" << textdest << "\"" << endl <<
+		        "               * \"" << datadest << "\"" << endl;
 		return 0;
 	}
 	else {
 		// TODO: delete the output files!
-		std::cout << *argv << ": there were errors while parsing" << std::endl;
+		cout << *argv << ": there were errors while parsing" << endl;
 		return 10;
 	}
 }
