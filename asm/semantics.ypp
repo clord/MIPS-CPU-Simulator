@@ -8,9 +8,9 @@ extern int32_t yylineno;
 int32_t yylex();
 extern codegen * cgen;
 short inline PACK_OPERANDS(byte x, byte y, byte z) {
-  return  x      & (unsigned short)0x001F | 
-         (y<<5)  & (unsigned short)0x03e0 | 
-         (z<<10) & (unsigned short)0x7C00;
+  return  x      & (uint16_t)0x001F | 
+         (y<<5)  & (uint16_t)0x03e0 | 
+         (z<<10) & (uint16_t)0x7C00;
   }
 %}
 %token NEWLINE TEXT_SECTION DATA_SECTION LABELDECL INTEGER LABELREF REGISTER INVALID_REGISTER
@@ -81,32 +81,32 @@ statement    : TEXT_SECTION    { cgen->in_text_section(); }
              ;
              
 instruction : ADDI    { cgen->emit<byte>(1); } rdest ',' rsrc1 { 
-                  cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
+                  cgen->emit<uint16_t>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
                   INTEGER { cgen->emit<uint32_t>($8); }
              | ADD    { cgen->emit<byte>(9); } rdest ',' rsrc1 ',' rsrc2 {
-                cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, $7.sysword)); 
+                cgen->emit<uint16_t>(PACK_OPERANDS($3.sysword, $5.sysword, $7.sysword)); 
                 cgen->emit<uint32_t>(0); }
              | SUBI   { cgen->emit<byte>(8); }    
-               rdest ',' rsrc1 { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
+               rdest ',' rsrc1 { cgen->emit<uint16_t>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
                INTEGER {
                  cgen->emit<uint32_t>($8);
                }
              | BRANCHGE  { cgen->emit<byte>(3); }  
-               rsrc1 ',' rsrc2 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); } 
+               rsrc1 ',' rsrc2 ',' { cgen->emit<uint16_t>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); } 
                address
              | BRANCHNE  { cgen->emit<byte>(4); } 
-               rsrc1 ',' rsrc2 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); }
+               rsrc1 ',' rsrc2 ',' { cgen->emit<uint16_t>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); }
                address
              | LOADBYTE  { cgen->emit<byte>(6); }
                rdest ',' offset    { 
-                 cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysoffset.reg, 0)); 
+                 cgen->emit<uint16_t>(PACK_OPERANDS($3.sysword, $5.sysoffset.reg, 0)); 
                  cgen->emit<uint32_t>($5.sysoffset.offset);
                }
              | LOADADDR  { cgen->emit<byte>(5); } 
-               rdest ',' { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, 0, 0)); } 
+               rdest ',' { cgen->emit<uint16_t>(PACK_OPERANDS($3.sysword, 0, 0)); } 
                address
              | BRANCHEQZ { cgen->emit<byte>(2); } 
-               rsrc1 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, 0)); }
+               rsrc1 ',' { cgen->emit<uint16_t>(PACK_OPERANDS(0, $3.sysword, 0)); }
                address
              | LOADIMMED rdest ',' INTEGER {
                  cgen->emit<byte>(7);
