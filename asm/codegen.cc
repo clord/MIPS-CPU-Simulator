@@ -21,8 +21,8 @@ void codegen::label_here(string name)
 		ostream & out(*(i->second.out));
 		streampos oldpos(out.tellp());
 		out.seekp(i->second.position);
-		streampos abspos(position + current->position);
-		out.write((char *)&abspos, sizeof(streampos));
+		uint32_t abspos(position + current->position);
+		out.write((char *)&abspos, sizeof(uint32_t));
 		out.seekp(oldpos);
 		++i;
 	}
@@ -37,14 +37,15 @@ void codegen::label_here(string name)
 // address will be written at location fileloc into ostream file.
 void codegen::emit_label_address(string name)
 {
-	const streampos blank;
+	const uint32_t blank = 0x0badf00d;
 
 	if (labels.find(name) == labels.end()) {
 		writeback_position_t s(current->out->tellp(), current->out);
 		pending_balance.insert(pair<string, writeback_position_t>(name, s));
-		current->out->write((char *)&blank, sizeof(streampos));
+		current->out->write((char *)&blank, sizeof(uint32_t));
 	}
 	else {
-		current->out->write((char *)&labels[name].position, sizeof(streampos));
+		uint32_t container = labels[name].position;
+		current->out->write((char *)&container, sizeof(uint32_t));
 	}
 }

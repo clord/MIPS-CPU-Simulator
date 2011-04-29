@@ -76,5 +76,6 @@ void memory::display_memory_stats()
 
 byte *memory::crackaddr(uint32_t addr)
 {
+	// TODO: raise exceptions on memory protection faults
 	return reinterpret_cast<byte*>(mem + addr);
 }
