@@ -2,7 +2,7 @@
 #include "../sim/types.h"
 
 
-codegen::codegen(std::ostream * text, std::ostream * data, unsigned int textoff, unsigned int dataoff) {
+codegen::codegen(std::ostream * text, std::ostream * data, uint32_t textoff, uint32_t dataoff) {
   t = text;
   d = data;
   toff = textoff;
@@ -21,21 +21,21 @@ void codegen::in_data_section() {
   off = doff;
 }
 
-void codegen::emit_n_bytes(int count) {
+void codegen::emit_n_bytes(int32_t count) {
   byte b = 0;
-  for (int x = 0; x < count; x++){
+  for (int32_t x = 0; x < count; x++){
     writestr->write((char*)&b, sizeof(byte));
   }
 }
 
-void codegen::emit_string(char* str, int len) {
+void codegen::emit_string(char* str, int32_t len) {
   writestr->write(str, len);
 }
 
 // the current location is noted as a label. go back and write in the right
 // places. memorize for future emissions of this label.
 void codegen::label_here(std::string name) {
-  system_word position = (system_word)writestr->tellp();
+  uint32_t position = (uint32_t)writestr->tellp();
   word__stream s = {position + off, writestr};
   labels[name] = s;
   // scan the pending_find map for all locations that need updating
@@ -50,8 +50,8 @@ void codegen::label_here(std::string name) {
   for(; i!=end; i++) {
     long oldpos = (*i).second.str->tellp();
     (*i).second.str->seekp((*i).second.word);
-    system_word abspos = position + off;
-    (*i).second.str->write((char*)&abspos, sizeof(system_word));
+    uint32_t abspos = position + off;
+    (*i).second.str->write((char*)&abspos, sizeof(uint32_t));
     (*i).second.str->seekp(oldpos);
   }  
   ranges = pending_find.equal_range(name);
@@ -63,12 +63,12 @@ void codegen::label_here(std::string name) {
 // address will be written at location fileloc into ostream file.
 void codegen::emit_label_address(std::string name) {
   if (labels.find(name) == labels.end()) {
-    word__stream s = {(system_word)writestr->tellp(), writestr};
+    word__stream s = {(uint32_t)writestr->tellp(), writestr};
     pending_find.insert(std::pair<std::string,word__stream>(name,s));
-    system_word blank = 0xffffffff;
-    writestr->write((char*)&blank, sizeof(system_word));
+    uint32_t blank = 0xffffffff;
+    writestr->write((char*)&blank, sizeof(uint32_t));
   } else {
-    writestr->write((char*)&labels[name].word, sizeof(system_word));
+    writestr->write((char*)&labels[name].word, sizeof(uint32_t));
   }
 }
 

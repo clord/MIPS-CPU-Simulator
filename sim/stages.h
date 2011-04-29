@@ -13,31 +13,31 @@ public:
 class IDl : public latch {
 public:
   byte Rdest, Rsrc1, Rsrc2;
-  system_word immediate;
-	system_word PC;
+  uint32_t immediate;
+	uint32_t PC;
 	bool predict_taken;
 };
 
 class DEl : public latch {
 public:
   byte Rdest, Rsrc1, Rsrc2;
-  system_word immediate;
-  int Rsrc1Val, Rsrc2Val;
-	system_word PC;
+  uint32_t immediate;
+  int32_t Rsrc1Val, Rsrc2Val;
+	uint32_t PC;
 	bool predict_taken;
 };
 
 class EMl : public latch {
 public:
   byte Rdest, Rsrc1, Rsrc2;
-  system_word aluresult;
-  int Rsrc1Val, Rsrc2Val;
+  uint32_t aluresult;
+  int32_t Rsrc1Val, Rsrc2Val;
 };
 
 class MWl : public latch {
 public:
-	system_word aluresult, mem_data, Rdest;
-	int Rsrc2Val, Rsrc1Val;
+	uint32_t aluresult, mem_data, Rdest;
+	int32_t Rsrc2Val, Rsrc1Val;
 };
 
 class InstructionFetchStage {

@@ -3,9 +3,9 @@
 #include "asm/codegen.h"
 #include <iostream>
 using namespace std;
-void yyerror(char*);
-extern int yylineno;
-int yylex();
+void yyerror(const char*);
+extern int32_t yylineno;
+int32_t yylex();
 extern codegen * cgen;
 short inline PACK_OPERANDS(byte x, byte y, byte z) {
   return  x      & (unsigned short)0x001F | 
@@ -64,7 +64,7 @@ rdest        : REGISTER
              | error { cout << "expected destination register; line " << yylineno << endl; exit(11);}
              ;
 
-address      : INTEGER         { cgen->emit<system_word>($1); }
+address      : INTEGER         { cgen->emit<uint32_t>($1); }
              | LABELREF        { cgen->emit_label_address($1.ptr); }
              | error {
                 cout << "invalid address; line " << yylineno << endl;  exit(11);
@@ -82,14 +82,14 @@ statement    : TEXT_SECTION    { cgen->in_text_section(); }
              
 instruction : ADDI    { cgen->emit<byte>(1); } rdest ',' rsrc1 { 
                   cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
-                  INTEGER { cgen->emit<system_word>($8); }
+                  INTEGER { cgen->emit<uint32_t>($8); }
              | ADD    { cgen->emit<byte>(9); } rdest ',' rsrc1 ',' rsrc2 {
                 cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, $7.sysword)); 
-                cgen->emit<system_word>(0); }
+                cgen->emit<uint32_t>(0); }
              | SUBI   { cgen->emit<byte>(8); }    
                rdest ',' rsrc1 { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysword, 0)); } ',' 
                INTEGER {
-                 cgen->emit<system_word>($8);
+                 cgen->emit<uint32_t>($8);
                }
              | BRANCHGE  { cgen->emit<byte>(3); }  
                rsrc1 ',' rsrc2 ',' { cgen->emit<unsigned short>(PACK_OPERANDS(0, $3.sysword, $5.sysword)); } 
@@ -100,7 +100,7 @@ instruction : ADDI    { cgen->emit<byte>(1); } rdest ',' rsrc1 {
              | LOADBYTE  { cgen->emit<byte>(6); }
                rdest ',' offset    { 
                  cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, $5.sysoffset.reg, 0)); 
-                 cgen->emit<system_word>($5.sysoffset.offset);
+                 cgen->emit<uint32_t>($5.sysoffset.offset);
                }
              | LOADADDR  { cgen->emit<byte>(5); } 
                rdest ',' { cgen->emit<unsigned short>(PACK_OPERANDS($3.sysword, 0, 0)); } 
@@ -111,15 +111,15 @@ instruction : ADDI    { cgen->emit<byte>(1); } rdest ',' rsrc1 {
              | LOADIMMED rdest ',' INTEGER {
                  cgen->emit<byte>(7);
                  cgen->emit<short>(PACK_OPERANDS($2.sysword, 0, 0));
-                 cgen->emit<system_word>($4);
+                 cgen->emit<uint32_t>($4);
                }
              | BRANCH { cgen->emit<byte>(2); cgen->emit<short>(0); }    
                address
              | SYSCALL {
-                  cgen->emit<byte>(10); cgen->emit<short>(0); cgen->emit<system_word>(0);
+                  cgen->emit<byte>(10); cgen->emit<short>(0); cgen->emit<uint32_t>(0);
                }
              | NOOP {
-                 cgen->emit<byte>(0); cgen->emit<short>(0); cgen->emit<system_word>(0);
+                 cgen->emit<byte>(0); cgen->emit<short>(0); cgen->emit<uint32_t>(0);
                }
              | LABELREF {
                 cout << "unknown instruction; line " << yylineno << endl;  exit(11);  
@@ -157,8 +157,8 @@ asciiz       : ASCIIZ STRING          { cgen->emit_string($2.ptr, $2.len); cgen-
              }
              ;
 
-integers     : INTEGER               { cgen->emit<system_word>($1); }
-             | integers INTEGER      { cgen->emit<system_word>($2); }
+integers     : INTEGER               { cgen->emit<uint32_t>($1); }
+             | integers INTEGER      { cgen->emit<uint32_t>($2); }
              ;
 
 bytes        : INTEGER               { cgen->emit<byte>($1); }

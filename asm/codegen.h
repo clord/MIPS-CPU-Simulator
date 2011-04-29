@@ -8,7 +8,7 @@
 #include "memory.h"
 
 struct word__stream {
-  system_word word;
+  uint32_t word;
   std::ostream * str;
 };
 /*
@@ -16,14 +16,14 @@ maintains labels and their locations, as well as where labels have to be updated
 Writes to the base stream
 */
 class codegen {
-  unsigned int toff, doff, off;
+  uint32_t toff, doff, off;
   std::ostream * t, * d, *writestr;
   std::multimap<std::string, word__stream> pending_find;
   std::map<std::string, word__stream> labels;
 
 public:
 
-  codegen(std::ostream * text, std::ostream * data, unsigned int textoff, unsigned int dataoff);
+  codegen(std::ostream * text, std::ostream * data, uint32_t textoff, uint32_t dataoff);
 
   void in_text_section();
   void in_data_section();
@@ -31,8 +31,8 @@ public:
   template <class T> void emit(T val) {
     writestr->write((char*)&val, sizeof(T));
   }
-  void emit_n_bytes(int count);
-  void emit_string(char* str, int len);
+  void emit_n_bytes(int32_t count);
+  void emit_string(char* str, int32_t len);
 
   // the current location is noted as a label. go back and write in the right
   // places. memorize for future emissions of this label.

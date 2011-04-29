@@ -8,10 +8,10 @@
 class cpu_core {
   public:
 	cpu_core() : ifs(this), ids(this), exs(this), mys(this),	wbs(this)	{}
-  system_word PC;
+  uint32_t PC;
   bool usermode, verbose;
   memory * mem;
-  system_word registers[32];
+  uint32_t registers[32];
 	InstructionFetchStage ifs;
 	InstructionDecodeStage ids;
 	ExecuteStage exs;

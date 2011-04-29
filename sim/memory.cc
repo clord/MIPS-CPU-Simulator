@@ -43,9 +43,9 @@ memory::~memory() {
 void memory::display_stack() {
   std::cout << "-----stack-----" << std::endl;
   std::cout.setf(std::ios::hex , std::ios::basefield);
-  for (int x = stack_segment; x > sp; x-=sizeof(system_word)) {
+  for (int32_t x = stack_segment; x > sp; x-=sizeof(uint32_t)) {
     std::cout << "0x" << x << ": 0x"
-              << *(int*)crackaddr(x) << std::endl;
+              << *(int32_t*)crackaddr(x) << std::endl;
   }
   std::cout << "---------------" << std::endl;
 }
@@ -78,7 +78,7 @@ void memory::display_memory_stats() {
 }
 
 
-byte* memory::crackaddr(system_word addr) {
+byte* memory::crackaddr(uint32_t addr) {
   // Determine which page to use.
   // [0x00000000-0x00400000) is not mapped, and will throw
   // [0x00400000-0x10000000) goes to text

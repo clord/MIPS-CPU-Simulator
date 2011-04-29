@@ -7,10 +7,10 @@
 #include "cpu.h"
 
 extern char * optarg;
-extern int optind;
-extern int optopt;
-extern int opterr;
-extern int optreset;
+extern int32_t optind;
+extern int32_t optopt;
+extern int32_t opterr;
+extern int32_t optreset;
 
 // Usage of the program
 static void usage(char * name) {
@@ -25,14 +25,14 @@ static void usage(char * name) {
 // *****************************
 //           entry point
 // *****************************
-int main(int argc, char ** argv) {
+int32_t main(int32_t argc, char ** argv) {
   memory mem;
   bool verb = false;
   bool text_loaded = false;
   bool show_cycles = false;
-  int ch;
-  system_word text_ptr = text_segment;
-  system_word data_ptr = data_segment;
+  int32_t ch;
+  uint32_t text_ptr = text_segment;
+  uint32_t data_ptr = data_segment;
   while ((ch = getopt(argc, argv, "t:d:vmc")) != -1) {
     switch (ch) {
     case 't': {

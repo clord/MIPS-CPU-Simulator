@@ -4,20 +4,20 @@
 #include "../sim/types.h"
 #include "../sim/memory.h"
 
-int yyparse();
+int32_t yyparse();
 extern FILE* yyin;
 codegen * cgen;
 
 // this is the generic error handler. we skip it in final builds
-void yyerror(char* s) {
+void yyerror(const char* s) {
   std::cout << s << ": ";
 }
 
 extern char * optarg;
-extern int optind;
-extern int optopt;
-extern int opterr;
-extern int optreset;
+extern int32_t optind;
+extern int32_t optopt;
+extern int32_t opterr;
+extern int32_t optreset;
 
 
 // will replace an extension in an existing string. must be nonconst (ie, 
@@ -44,8 +44,8 @@ static void usage(char * name){
 // *****************************
 //           entry point
 // *****************************
-int main(int argc, char ** argv) {
-  int ch;
+int32_t main(int32_t argc, char ** argv) {
+  int32_t ch;
   char * source = NULL;
   char * textdest = NULL, * datadest = NULL;
   std::ofstream text_stream;

@@ -1,22 +1,25 @@
 #ifndef _MTYPES_H_
 #define _MTYPES_H_
+#include <stdint.h>
 
-typedef unsigned char byte;
-typedef unsigned int system_word;
-typedef struct _system_string {
-  int len;
+typedef uint8_t byte;
+
+struct system_string {
+  int32_t len;
   char * ptr;
-} system_string;
-typedef struct _sys_offset {
-  unsigned int reg;
-  int offset; 
-} sys_offset;
-typedef union YYSTYPE {
+};
+
+struct sys_offset {
+  uint32_t reg;
+  int32_t offset;
+};
+
+union YYSTYPE {
     system_string sysstring;
-    system_word   sysword;
+    uint32_t sysword;
     sys_offset sysoffset;
-    
-} YYSTYPE;
+};
+
 #define YYSTYPE_IS_DECLARED 1
 #endif /* MTYPES */
 

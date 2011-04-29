@@ -1,7 +1,7 @@
 %option noyywrap
 %option nounput
 %option yylineno
-%{
+%{ 
 #include "sim/types.h"
 #include <iostream>     
 #include <stdlib.h>
@@ -10,10 +10,10 @@
 
 using namespace std;
 
-const int MAX_STR_CONST = 0x9000;
+const int32_t MAX_STR_CONST = 0x9000;
 char string_buf[MAX_STR_CONST];
 char *string_buf_ptr;
-extern int yylineno;
+extern int32_t yylineno;
 
 %}
 
@@ -45,7 +45,7 @@ ws       [ \t]+
 <string>\042 { 
   BEGIN(INITIAL);
   *string_buf_ptr = '\0';
-  int length = string_buf_ptr - string_buf; // null deliberately left out; this is asm!
+  int32_t length = string_buf_ptr - string_buf; // null deliberately left out; this is asm!
   yylval.sysstring.ptr = string_buf;
   yylval.sysstring.len = length;
   return STRING;
@@ -56,7 +56,7 @@ ws       [ \t]+
 }
 <string>\\[0-7]{1,3} {
     /* octal escape sequence */
-    int result;
+    int32_t result;
     sscanf(yytext + 1, "%o", &result);
     if (result > 0xff) {
       /* error, constant is out-of-bounds */
@@ -110,7 +110,7 @@ ws       [ \t]+
 
 {id}\: {
   // Found a label decl.
-  int sl = strlen(yytext);
+  int32_t sl = strlen(yytext);
   yytext[sl-1] = 0; // take out colon
   yylval.sysstring.len = sl;
   yylval.sysstring.ptr = yytext; 
@@ -119,7 +119,7 @@ ws       [ \t]+
 
 {id} {
   // Found a label ref. 
-  int sl = strlen(yytext);
+  int32_t sl = strlen(yytext);
   yylval.sysstring.len = sl;
   yylval.sysstring.ptr = yytext;
   return LABELREF;

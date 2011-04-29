@@ -18,7 +18,7 @@ void InstructionFetchStage::Execute() {
   right.opcode = core->mem->get<byte>(core->PC);
   unsigned short operands = core->mem->get<unsigned short>(core->PC+1);
   decode_ops(operands, &right.Rdest, &right.Rsrc1, &right.Rsrc2);
-  right.immediate = core->mem->get<system_word>(core->PC+3);
+  right.immediate = core->mem->get<uint32_t>(core->PC+3);
   core->PC += 8;
   right.PC = core->PC;
   right.predict_taken = false;
@@ -26,8 +26,8 @@ void InstructionFetchStage::Execute() {
 
 void InstructionDecodeStage::Execute() {
   core->registers[0] = 0; // wire register 0 to zero for all register reads
-  right.Rsrc1Val = *(int*)&core->registers[left.Rsrc1];
-  right.Rsrc2Val = *(int*)&core->registers[left.Rsrc2];
+  right.Rsrc1Val = *(int32_t*)&core->registers[left.Rsrc1];
+  right.Rsrc2Val = *(int32_t*)&core->registers[left.Rsrc2];
   right.immediate = left.immediate;
   right.Rsrc1 = left.Rsrc1;
   right.Rsrc2 = left.Rsrc2;
@@ -37,7 +37,7 @@ void InstructionDecodeStage::Execute() {
   right.predict_taken = left.predict_taken;
 }
 void ExecuteStage::Execute() {
-  system_word param;
+  uint32_t param;
 	
   switch(left.control()->alu_source) {
   case 0: // source from register
@@ -47,13 +47,13 @@ void ExecuteStage::Execute() {
     param = left.immediate;
     break;
   case 2: // address calculation
-    param = left.immediate + *(system_word*)&left.Rsrc1Val;
+    param = left.immediate + *(uint32_t*)&left.Rsrc1Val;
     break;
   }
   // for those operands which require signed arithmatic.
-  int svalue = left.Rsrc1Val;
-  int sparam = *(int*)&param;
-  int result = sparam;
+  int32_t svalue = left.Rsrc1Val;
+  int32_t sparam = *(int32_t*)&param;
+  int32_t result = sparam;
 
   if (left.control()->branch) {
     bool taken = (left.opcode==2 && left.Rsrc1Val == 0) ||
@@ -84,7 +84,7 @@ void ExecuteStage::Execute() {
     result = svalue - sparam;
     break;
   }
-  right.aluresult = *(system_word*)&result;
+  right.aluresult = *(uint32_t*)&result;
 
 
 
@@ -106,13 +106,13 @@ void MemoryStage::Execute() {
     if (control->mem_read == 1) {
       right.mem_data = core->mem->get<byte>(left.aluresult);
     } else if (control->mem_read == 4) {
-      right.mem_data = core->mem->get<system_word>(left.aluresult);
+      right.mem_data = core->mem->get<uint32_t>(left.aluresult);
     }
   } else if (control->mem_write) {
     if (control->mem_write == 1) {
       core->mem->set<byte>(left.aluresult, left.Rsrc2Val);
     } else if (control->mem_write == 4) {
-      core->mem->set<system_word>(left.aluresult, left.Rsrc2Val);
+      core->mem->set<uint32_t>(left.aluresult, left.Rsrc2Val);
     }
   }
   right.opcode = left.opcode;

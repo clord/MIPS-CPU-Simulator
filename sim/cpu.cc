@@ -74,7 +74,7 @@ void run_cpu(memory * mem, const bool verbose_cpu) {
   core.verbose = verbose_cpu;
 
   // initialize registers
-  for (int x = 0; x < 32; x++)
+  for (int32_t x = 0; x < 32; x++)
     core.registers[x] = 0;
 
   // start the cpu loop
@@ -106,7 +106,7 @@ void run_cpu(memory * mem, const bool verbose_cpu) {
       #if 0 
       // Occasionally this stuff is useful
       if (core.verbose) {
-        for (int x = 0; x < 8; x++) {
+        for (int32_t x = 0; x < 8; x++) {
           printf("$%d:\t0x%08x\t\t$%d:\t0x%08x\t\t$%d:\t0x%08x\t\t$%d:\t0x%08x\n",
                  x,    core.registers[x],
                  x+8,  core.registers[x+8],

@@ -5,11 +5,11 @@
 #include "types.h"
 
 // some constants that are memory-specific
-const system_word  text_segment = 0x00400000;
-const system_word  data_segment = 0x10000000;
-const system_word ktext_segment = 0x80000080;
-const system_word kdata_segment = 0x90000000;
-const system_word stack_segment = 0x80000000-0x1000;
+const uint32_t  text_segment = 0x00400000;
+const uint32_t  data_segment = 0x10000000;
+const uint32_t ktext_segment = 0x80000080;
+const uint32_t kdata_segment = 0x90000000;
+const uint32_t stack_segment = 0x80000000-0x1000;
 // ^ stack grows down, this is the bottom-most element (reserved space for catching errors)
 // mmap supports growing down, so all is well.
 
@@ -20,18 +20,18 @@ class memory {
   byte *  data_mem;
   byte * stack_mem;
 
-  int sp;
+  int32_t sp;
   
   bool collectstats;
 
-  unsigned int readhits, writehits, bytesin, bytesout, stackpushes, stackpops;
+  uint32_t readhits, writehits, bytesin, bytesout, stackpushes, stackpops;
 
 public:
 
   memory();
   ~memory();
 
-  byte* crackaddr(system_word addr);
+  byte* crackaddr(uint32_t addr);
   
   void display_stack();
   
@@ -62,7 +62,7 @@ public:
   
   // templated to support elements of any size. argument must support sizeof
   // and be byte-addressable. 
-  template <class T> T get(system_word addr) {
+  template <class T> T get(uint32_t addr) {
     byte buff[sizeof(T)];
     memcpy(buff, crackaddr(addr), sizeof(T));
     if (collectstats) {
@@ -72,7 +72,7 @@ public:
     return *(T*)buff;
   }
 
-  template <class T> void set(system_word addr, T value) {
+  template <class T> void set(uint32_t addr, T value) {
     memcpy(crackaddr(addr), &value, sizeof(T));
     if (collectstats) {
       writehits++;
