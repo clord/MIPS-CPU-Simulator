@@ -88,7 +88,8 @@ int32_t main(int32_t argc, char ** argv) {
   text_stream.open(textdest, std::ios::binary);
   
   bool success = false;
-  cgen = new codegen(&text_stream, &data_stream, text_segment, data_segment);
+  cgen = new codegen(writeback_position_t(text_segment, &text_stream), 
+                     writeback_position_t(data_segment, &data_stream));
   
   // Perform the lexing and grammar
   success = 0 == yyparse();

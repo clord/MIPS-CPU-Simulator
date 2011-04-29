@@ -139,19 +139,19 @@ byte         : BYTE bytes
              }                                     
              ;                                     
 
-space        : SPACE INTEGER         { cgen->emit_n_bytes($2); }
+space        : SPACE INTEGER         { cgen->emit_n<byte>($2, 0); }
              | SPACE error {                       
                cout << "invalid .space; line " << yylineno << endl;   exit(11);             
              }                                     
              ;                                     
 
-ascii        : ASCII STRING          { cgen->emit_string($2.ptr, $2.len); }
+ascii        : ASCII STRING          { cgen->emit_string(std::string($2.ptr, $2.len)); }
              | ASCII error {                       
                 cout << "invalid .ascii; line " << yylineno << endl;  exit(11);
              }
              ;
 
-asciiz       : ASCIIZ STRING          { cgen->emit_string($2.ptr, $2.len); cgen->emit<byte>(0); }
+asciiz       : ASCIIZ STRING          { cgen->emit_string(std::string($2.ptr, $2.len)); cgen->emit<byte>(0); }
              | ASCIIZ error {                       
                 cout << "invalid .asciiz; line " << yylineno << endl;  exit(11);
              }

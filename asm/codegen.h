@@ -7,45 +7,73 @@
 #include "../sim/types.h"
 #include "memory.h"
 
-struct word__stream {
-  uint32_t word;
-  std::ostream * str;
+
+struct writeback_position_t {
+  std::streampos position;
+  std::ostream * out;
+  writeback_position_t(std::streampos p, std::ostream * _str) : position(p), out(_str) {}
+  writeback_position_t() : position(), out(0) {}
 };
-/*
-maintains labels and their locations, as well as where labels have to be updated. 
-Writes to the base stream
-*/
+
+
+// Maintains labels and their locations, as well as where labels have to be updated. 
+// Writes to the base stream
 class codegen {
-  uint32_t toff, doff, off;
-  std::ostream * t, * d, *writestr;
-  std::multimap<std::string, word__stream> pending_find;
-  std::map<std::string, word__stream> labels;
+  typedef std::multimap<std::string, writeback_position_t> pending_balance_t;
+  typedef std::map<std::string, writeback_position_t> labels_t;
+  writeback_position_t text, data;
+  const writeback_position_t *current;
+  pending_balance_t pending_balance;
+  labels_t labels;
+  codegen();
 
 public:
 
-  codegen(std::ostream * text, std::ostream * data, uint32_t textoff, uint32_t dataoff);
 
-  void in_text_section();
-  void in_data_section();
+  codegen(const writeback_position_t &_text, const writeback_position_t &_data) : 
+    text(_text), data(_data), current(&text) {}
 
-  template <class T> void emit(T val) {
-    writestr->write((char*)&val, sizeof(T));
+
+  void in_text_section() { current = &text; }
+  void in_data_section() { current = &data; }
+
+
+  template <typename T>
+  void emit(const T& val) {
+    current->out->write((char*)&val, sizeof(T));
   }
-  void emit_n_bytes(int32_t count);
-  void emit_string(char* str, int32_t len);
+
+
+  template <typename T>
+  void emit_n(int32_t count, const T& val) {
+    for (int32_t x = 0; x < count; x++) {
+      current->out->write((char*)&val, sizeof(T));
+    }
+  }
+
+
+  void emit_string(const std::string &str) {
+    current->out->write(str.c_str(), str.length());
+  }
+
 
   // the current location is noted as a label. go back and write in the right
   // places. memorize for future emissions of this label.
   void label_here(std::string name);
-  
+
+
   // if label is already defined, just return address and we are donee
   // if not defined, when the desired label is found, the appropriate 
   // address will be written at location fileloc into ostream file.
   void emit_label_address(std::string name);
-  
+
+
   // When the file is finished, use this method to see if all labels
   // are "balanced". If not, you should indicate an error and exit from the app
-  bool balanced_labels();
+  // due to a label used but not defined.
+  inline bool balanced_labels() {
+    return pending_balance.empty();
+  }
 };
 
 
