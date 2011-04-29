@@ -15,9 +15,8 @@ const uint32_t stack_segment = 0x80000000 - 0x1000;
 
 class memory {
 	// pointers to the various system segments.
-	byte   *text_mem;
-	byte   *data_mem;
-	byte   *stack_mem;
+
+	byte * mem;
 
 	int32_t sp;
 

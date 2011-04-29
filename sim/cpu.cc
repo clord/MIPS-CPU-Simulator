@@ -28,8 +28,8 @@ static void print_stages(cpu_core *core)
 	      , core->exs.left.control()->name
 	      , core->exs.right.Rdest
 	      , core->exs.right.Rsrc1
-	      , (core->exs.left.opcode == 1 || (core->exs.left.opcode == 9) ?
-	         '+' : (core->exs.left.opcode == 8 ? '-' : ' '))
+	      , (core->exs.left.opcode == 1 || 
+	        (core->exs.left.opcode == 9) ? '+' : (core->exs.left.opcode == 8 ? '-' : ' '))
 	      , core->exs.right.Rsrc2
 	      , core->exs.right.aluresult);
 

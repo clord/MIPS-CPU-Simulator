@@ -13,7 +13,7 @@ if [ "$?" = "0" ]
 then
   shift
   echo "script: simulating..."
-  ./rsim -t temp.t -d temp.d $*
+  ./rsim -t temp.t -d temp.d $* -cm
   rm -f temp.t temp.d
   echo "script: done"
 fi

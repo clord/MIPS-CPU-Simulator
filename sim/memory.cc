@@ -6,22 +6,9 @@
 
 memory::memory()
 {
-	// Allocate some paged memory. All of this is to work around
-	// the poor 32-bit machine that can't mmap a true-flat main memory.
-	// TODO: kernel memory
-	text_mem = (byte *)mmap(NULL, 0x0FC00000, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
-	if (text_mem == MAP_FAILED) {
-		perror(".text mmap failed");
-		exit(20);
-	}
-	data_mem = (byte *)mmap(NULL, 0x10000000, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
-	if (data_mem == MAP_FAILED) {
-		perror(".data mmap failed");
-		exit(20);
-	}
-	stack_mem = (byte *)mmap(NULL, 0x10000000, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
-	if (stack_mem == MAP_FAILED) {
-		perror(".stack mmap failed");
+	mem = (byte *)mmap(NULL, 0x100000000, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
+	if (mem == MAP_FAILED) {
+		perror("mmap failed to allocate simulator ram");
 		exit(20);
 	}
 	sp = stack_segment;
@@ -38,9 +25,7 @@ memory::memory()
 
 memory::~memory()
 {
-	munmap(text_mem, 0x0FC00000);
-	munmap(data_mem, 0x10000000);
-	munmap(stack_mem, 0x10000000);
+	munmap(mem, 0x100000000);
 }
 
 
@@ -88,21 +73,5 @@ void memory::display_memory_stats()
 
 byte *memory::crackaddr(uint32_t addr)
 {
-	// Determine which page to use.
-	// [0x00000000-0x00400000) is not mapped, and will throw
-	// [0x00400000-0x10000000) goes to text
-	// [0x10000000-0x50000000) goes to data
-	// [0x50000000-0x80000000) goes to stack
-	// kernel segments are unmapped, and will also throw
-
-	if (addr < 0x00400000 || addr >= 0x80000000) throw "protected memory exception";
-	else if (addr < 0x10000000 && addr >= 0x00400000)
-		return text_mem + addr;
-	else if (addr < 0x50000000 && addr >= 0x10000000)
-		return data_mem + addr;
-	else if (addr < 0x80000000 && addr > 0x50000000)
-		return stack_mem + (0x80000000 - addr); // convert to growing up behind the scenes for mmap
-	else {
-		throw "memory out of range exception";
-	}
+	return reinterpret_cast<byte*>(mem + addr);
 }
