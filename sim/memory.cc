@@ -2,6 +2,8 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <iostream>
+#include <cstdlib>
+#include <cstdio>
 //#define MAP_ANON MAP_ANONYMOUS
 
 using namespace std;
